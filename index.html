@@ -29,8 +29,8 @@
     .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
     .track-card { background: #fdfdfd; border-radius: 1.8rem; padding: 1.4rem 1.2rem 1.2rem; border: 1px solid #e9eef3; transition: 0.3s; display: flex; flex-direction: column; gap: 0.7rem; }
     .track-card:hover { transform: translateY(-8px); border-color: #3d73e0; box-shadow: 0 20px 30px -10px rgba(61,115,224,0.15); }
-    .vinyl-disc { width: 70px; height: 70px; background: radial-gradient(circle at 30% 30%, #2a2a2a, #0a0a0a 80%); border-radius: 50%; margin: 0 auto; box-shadow: 0 8px 18px rgba(0,0,0,0.3); border: 2px solid #333; position: relative; }
-    .vinyl-disc::before { content: ""; width: 18px; height: 18px; background: #111; border-radius: 50%; border: 2px solid #3d73e0; position: absolute; }
+    .vinyl-disc { width: 70px; height: 70px; background: radial-gradient(circle at 30% 30%, #2a2a2a, #0a0a0a 80%); border-radius: 50%; margin: 0 auto; box-shadow: 0 8px 18px rgba(0,0,0,0.3); border: 2px solid #333; position: relative; display: flex; align-items: center; justify-content: center; }
+    .vinyl-disc::before { content: ""; width: 18px; height: 18px; background: #111; border-radius: 50%; border: 2px solid #3d73e0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .track-title { font-weight: 700; font-size: 1.1rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .track-artist { font-size: 0.9rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; }
@@ -115,16 +115,6 @@
       // БАЗА ТРЕКОВ
       // Чтобы добавить ссылку на трек, вставьте её в поле "url"
       // каждого трека. Ссылка должна быть на YouTube / Spotify / MP3.
-      //
-      // Примеры:
-      //   url: "https://www.youtube.com/watch?v=_Yhyp-_hX2s"   ← YouTube
-      //   url: "https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT" ← Spotify
-      //   url: "tracks/lose-yourself.mp3"                     ← локальный файл
-      //
-      // ГДЕ ИСКАТЬ ССЫЛКИ:
-      //   YouTube: откройте трек → кнопка "Поделиться" → скопируйте ссылку
-      //   Spotify: откройте трек → "Поделиться" → "Копировать ссылку на трек"
-      //   Локальный: положите MP3-файл в папку с этим HTML-файлом
       // ============================================================
 
       const tracks = [
