@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Умный звук • Рекомендатель треков</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f0f4f8; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; color: #1e293b; }
+    .app { max-width: 1300px; width: 100%; background: #fff; border-radius: 2.5rem; padding: 2.5rem 2rem; box-shadow: 0 20px 40px -12px rgba(0,0,0,0.08); border: 1px solid #e9eef3; }
+    .app-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.8rem; }
+    h1 { font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 2.4rem; color: #1e293b; display: flex; align-items: center; gap: 0.8rem; }
+    h1 span { color: #3d73e0; }
+    .guide-btn, .author-btn { background: #fff; border: 2px solid #3d73e0; color: #3d73e0; font-weight: 700; padding: 0.8rem 1.8rem; border-radius: 3rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: 0.25s; }
+    .guide-btn:hover, .author-btn:hover { background: #3d73e0; color: #fff; transform: translateY(-2px); }
+    .author-btn { border-color: #64748b; color: #64748b; }
+    .author-btn:hover { background: #64748b; color: #fff; }
+    .sub-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; }
+    .description { font-size: 1.1rem; color: #64748b; font-weight: 500; }
+    .mode-buttons { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+    .mode-btn { background: #fafbfc; border: 1px solid #dce3eb; padding: 0.9rem 2rem; border-radius: 3rem; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: 0.25s; }
+    .mode-btn:hover { border-color: #3d73e0; background: #f0f5ff; transform: translateY(-2px); }
+    .mode-btn.active { background: #3d73e0; border-color: #3d73e0; color: #fff; }
+    .recommendation-title { font-family: 'Unbounded', sans-serif; font-weight: 600; font-size: 1.4rem; margin: 1.5rem 0 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: #334155; }
+    .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+    .track-card { background: #fdfdfd; border-radius: 1.8rem; padding: 1.4rem 1.2rem 1.2rem; border: 1px solid #e9eef3; transition: 0.3s; display: flex; flex-direction: column; gap: 0.7rem; }
+    .track-card:hover { transform: translateY(-8px); border-color: #3d73e0; box-shadow: 0 20px 30px -10px rgba(61,115,224,0.15); }
+    .vinyl-disc { width: 70px; height: 70px; background: radial-gradient(circle at 30% 30%, #2a2a2a, #0a0a0a 80%); border-radius: 50%; margin: 0 auto; box-shadow: 0 8px 18px rgba(0,0,0,0.3); border: 2px solid #333; position: relative; }
+    .vinyl-disc::before { content: ""; width: 18px; height: 18px; background: #111; border-radius: 50%; border: 2px solid #3d73e0; position: absolute; }
+    .track-title { font-weight: 700; font-size: 1.1rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-artist { font-size: 0.9rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; }
+    .bpm { background: #eef2f6; padding: 0.2rem 0.7rem; border-radius: 2rem; font-weight: 700; color: #1e40af; }
+    .genre-badge { background: rgba(61,115,224,0.1); color: #1e3a8a; padding: 0.2rem 0.8rem; border-radius: 1rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .cult-badge { background: #fed7aa; color: #9a3412; margin-left: 0.4rem; padding: 0.15rem 0.6rem; border-radius: 1rem; font-size: 0.65rem; font-weight: 700; }
+    .play-btn { margin-top: 0.6rem; background: #f8faff; border: 1px solid #3d73e0; color: #3d73e0; padding: 0.5rem; border-radius: 2rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; transition: 0.2s; }
+    .play-btn:hover { background: #3d73e0; color: #fff; }
+    .vinyl-spinner { width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(#1a1a1a 0deg, #2d2d2d 90deg, #3d73e0 180deg, #1a1a1a 270deg, #2d2d2d 360deg); animation: spin 0.7s linear infinite; margin: 3rem auto; box-shadow: 0 0 25px rgba(61,115,224,0.5); position: relative; }
+    .vinyl-spinner::after { content: ""; width: 20px; height: 20px; background: #0a0a0a; border-radius: 50%; border: 2px solid #3d73e0; position: absolute; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-content { background: #fff; border-radius: 2rem; max-width: 750px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 2rem; position: relative; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .modal-content h2 { font-family: 'Unbounded', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem; }
+    .modal-content h3 { font-weight: 700; font-size: 1.2rem; margin: 1.5rem 0 0.8rem; color: #3d73e0; }
+    .modal-content p, .modal-content li { line-height: 1.7; color: #334155; }
+    .modal-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+    .modal-content th { background: #f1f5f9; padding: 0.8rem; text-align: left; }
+    .modal-content td { padding: 0.7rem 0.8rem; border-bottom: 1px solid #e2e8f0; }
+    .close-modal { position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; font-size: 2rem; cursor: pointer; color: #64748b; }
+    @media (max-width: 550px) { .app { padding: 1.5rem; } .mode-buttons { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <h1><i data-lucide="sliders-horizontal"></i><span>Умный звук</span></h1>
+      <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+        <button class="author-btn" id="authorBtn"><i data-lucide="user"></i> Автор</button>
+        <button class="guide-btn" id="openGuideBtn"><i data-lucide="book-open"></i> Рекомендации</button>
+      </div>
+    </div>
+    <div class="sub-header"><div class="description" id="dynamicDescription">Взрыв энергии: мощный темп, драйв</div></div>
+    <div class="mode-buttons">
+      <button class="mode-btn active" data-category="energy"><i data-lucide="zap"></i> Взрыв энергии</button>
+      <button class="mode-btn" data-category="active_mind"><i data-lucide="brain"></i> Активный ум</button>
+      <button class="mode-btn" data-category="deep_focus"><i data-lucide="moon"></i> Глубокий фокус</button>
+    </div>
+    <div id="dynamicTitle" class="recommendation-title"><i data-lucide="flame"></i> Взрыв энергии · мощный темп</div>
+    <div id="contentArea"></div>
+  </div>
+
+  <!-- Модальное окно с рекомендациями -->
+  <div class="modal-overlay" id="guideModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModalBtn">&times;</button>
+      <h2>📘 Как подбирать музыку</h2>
+      <h3>1. Выберите свой сценарий</h3>
+      <table>
+        <thead><tr><th>Сценарий</th><th>Когда включать</th><th>Какой темп</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Глубокий фокус</strong></td><td>Экзамены, сложные задачи, новый материал</td><td>60–70 BPM</td></tr>
+          <tr><td><strong>Активный ум</strong></td><td>Рутина, повторение, тесты, простые задания</td><td>80–100 BPM</td></tr>
+          <tr><td><strong>Взрыв энергии</strong></td><td>Спорт, уборка, прогулка, физическая активность</td><td>120–160 BPM</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Важно:</strong> для первых двух сценариев — музыка без слов. Для третьего — слова допустимы.</p>
+      <h3>2. Настройте громкость и режим</h3>
+      <p><strong>Громкость:</strong> чуть тише обычного разговора (20–30% на смартфоне). <strong>Режим:</strong> составьте плейлист заранее. <strong>Повтор:</strong> это нормально.</p>
+      <h3>3. Делайте паузы</h3>
+      <p>Войдите в задачу в тишине (2–3 минуты). Каждые 45–50 минут — пауза 5 минут.</p>
+      <h3>4. Чего избегать</h3>
+      <table>
+        <thead><tr><th>Не делайте так</th><th>Делайте так</th></tr></thead>
+        <tbody>
+          <tr><td>Песни со словами при чтении</td><td>Инструментальные версии</td></tr>
+          <tr><td>Новые альбомы</td><td>Только знакомые треки</td></tr>
+          <tr><td>Громко</td><td>Тихо — фон не мешает</td></tr>
+        </tbody>
+      </table>
+      <h3>Краткая памятка</h3>
+      <p><strong>Глубокий фокус</strong> — без слов, 60–70 BPM. <strong>Активный ум</strong> — без слов, 80–100 BPM. <strong>Взрыв энергии</strong> — со словами, 120+ BPM.</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      lucide.createIcons();
+
+      // ============================================================
+      // БАЗА ТРЕКОВ
+      // Чтобы добавить ссылку на трек, вставьте её в поле "url"
+      // каждого трека. Ссылка должна быть на YouTube / Spotify / MP3.
+      //
+      // Примеры:
+      //   url: "https://www.youtube.com/watch?v=_Yhyp-_hX2s"   ← YouTube
+      //   url: "https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT" ← Spotify
+      //   url: "tracks/lose-yourself.mp3"                     ← локальный файл
+      //
+      // ГДЕ ИСКАТЬ ССЫЛКИ:
+      //   YouTube: откройте трек → кнопка "Поделиться" → скопируйте ссылку
+      //   Spotify: откройте трек → "Поделиться" → "Копировать ссылку на трек"
+      //   Локальный: положите MP3-файл в папку с этим HTML-файлом
+      // ============================================================
+
+      const tracks = [
+
+        // ---------- ВЗРЫВ ЭНЕРГИИ (15 треков) ----------
+        // 👇 ЗАМЕНИТЕ ЗДЕСЬ: вставьте ссылку на YouTube/Spotify в поле url
+        { title: "Lose Yourself", artist: "Eminem", bpm: 171, lyrics: true, genre: "hip-hop", cult: false,
+          url: "https://music.yandex.ru/album/4846/track/18860" }, 
+
+        { title: "Till I Collapse", artist: "Eminem, Nate Dogg", bpm: 171, lyrics: true, genre: "hip-hop", cult: false,
+          url: "https://music.yandex.ru/album/29639675/track/555328" }, 
+
+        { title: "Stronger", artist: "Kanye West", bpm: 104, lyrics: true, genre: "hip-hop", cult: false,
+          url: "https://music.yandex.ru/album/21078440/track/3264" }, 
+
+        { title: "The Hills", artist: "The Weeknd", bpm: 113, lyrics: true, genre: "pop", cult: false,
+          url: "https://music.yandex.ru/album/2929676/track/24948471" }, 
+
+        { title: "What I've Done", artist: "Linkin Park", bpm: 120, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/22492384/track/104497801" }, // 
+
+        { title: "Given Up", artist: "Linkin Park", bpm: 100, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/154525/track/170105" }, 
+
+        { title: "Breathe", artist: "The Prodigy", bpm: 130, lyrics: true, genre: "electronic", cult: false,
+          url: "https://music.yandex.ru/album/11644773/track/707386" }, 
+
+        { title: "Believer", artist: "Imagine Dragons", bpm: 125, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/16828669/track/33311009" }, 
+
+        { title: "Feuer Frei!", artist: "Rammstein", bpm: 130, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/3542/track/37342134" }, 
+
+        { title: "Can't Stop", artist: "Red Hot Chili Peppers", bpm: 116, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/2390201/track/214489" }, 
+
+        { title: "Enter Sandman", artist: "Metallica", bpm: 123, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/18031896/track/90947896" }, 
+
+        { title: "Fuel", artist: "Metallica", bpm: 140, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/3267/track/39484" }, 
+
+        { title: "Thunderstruck", artist: "AC/DC", bpm: 134, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/36574000/track/139042913" }, 
+
+        { title: "Eye of the Tiger", artist: "Survivor", bpm: 109, lyrics: true, genre: "rock", cult: true,
+          url: "https://music.yandex.ru/album/3134463/track/24130308" }, 
+
+        { title: "Holiday", artist: "Green Day", bpm: 148, lyrics: true, genre: "rock", cult: false,
+          url: "https://music.yandex.ru/album/37617/track/370406" },
+
+
+        // ---------- АКТИВНЫЙ УМ (14 треков) ----------
+        { title: "Loud Pipes", artist: "Ratatat", bpm: 90, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Kiara", artist: "Bonobo", bpm: 87, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Veridis Quo", artist: "Daft Punk", bpm: 93, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Voyager", artist: "Daft Punk", bpm: 118, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Midnight City", artist: "M83", bpm: 105, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Echoes", artist: "M83", bpm: 95, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "La Ritournelle", artist: "Sébastien Tellier", bpm: 100, lyrics: false, genre: "indie", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "On top of the mountain", artist: "Aitg1", bpm: 85, lyrics: false, genre: "ambient", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "La Femme d'argent", artist: "Air", bpm: 80, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Dayvan Cowboy", artist: "Boards of Canada", bpm: 92, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Greenland", artist: "Emancipator", bpm: 88, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Friday Morning", artist: "Khruangbin", bpm: 82, lyrics: false, genre: "indie", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Two Thousand and Seventeen", artist: "Four Tet", bpm: 90, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Red Bridge", artist: "Tycho", bpm: 95, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+
+        // ---------- ГЛУБОКИЙ ФОКУС (14 треков) ----------
+        { title: "River Flows In You", artist: "Yiruma", bpm: 65, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Experience", artist: "Ludovico Einaudi", bpm: 60, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Nuvole Bianche", artist: "Ludovico Einaudi, Daniel Hope", bpm: 68, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Cornfield Chase", artist: "Hans Zimmer", bpm: 60, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Gladiator Suite", artist: "Hans Zimmer, Prague Philharmonic", bpm: 55, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "On The Nature Of Daylight", artist: "Max Richter", bpm: 50, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Dream 3 (Short Edit)", artist: "Max Richter, Ben Russell", bpm: 58, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Says", artist: "Nils Frahm", bpm: 70, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Flight From The City", artist: "Jóhann Jóhannsson", bpm: 62, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "3 Gymnopédies: I. Lent et douloureux", artist: "Erik Satie", bpm: 55, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Gnossienne No. 1", artist: "Erik Satie, Hákon Austbø", bpm: 60, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Avril 14th", artist: "Aphex Twin", bpm: 65, lyrics: false, genre: "electronic", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Glass", artist: "Hania Rani", bpm: 58, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+        { title: "Sleep", artist: "Max Richter", bpm: 40, lyrics: false, genre: "classical", cult: false,
+          url: "" }, // ← СЮДА ВСТАВИТЬ ССЫЛКУ
+
+      ];
+
+      // ============================================================
+      // КОНЕЦ БАЗЫ ТРЕКОВ
+      // ============================================================
+
+      function recommend(category) {
+        if (category === 'energy') return tracks.filter(t => t.bpm >= 100 || ['rock','electronic','hip-hop'].includes(t.genre)).slice(0, 15);
+        if (category === 'active_mind') return tracks.filter(t => !t.lyrics && t.bpm >= 80 && t.bpm <= 120);
+        if (category === 'deep_focus') return tracks.filter(t => !t.lyrics && t.bpm <= 70);
+        return [];
+      }
+
+      const desc = { energy: "Взрыв энергии: мощный темп, драйв", active_mind: "Активный ум: инструменталы для рутины", deep_focus: "Глубокий фокус: погружение в тишине" };
+      const titles = { energy: '<i data-lucide="flame"></i> Взрыв энергии · мощный темп', active_mind: '<i data-lucide="brain"></i> Активный ум · без слов', deep_focus: '<i data-lucide="moon"></i> Глубокий фокус · погружение' };
+
+      const area = document.getElementById('contentArea');
+      const descEl = document.getElementById('dynamicDescription');
+      const titleEl = document.getElementById('dynamicTitle');
+      const btns = document.querySelectorAll('.mode-btn');
+      let cat = 'energy';
+
+      function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+      function render(list, c) {
+        if (!list.length) { area.innerHTML = '<p style="color:#64748b;text-align:center;padding:2rem;">🔇 Ничего не найдено</p>'; return; }
+        area.innerHTML = `<div class="track-grid">${list.map(t => `
+          <div class="track-card">
+            <div class="vinyl-disc"></div>
+            <div class="track-title">${esc(t.title)}</div>
+            <div class="track-artist">${esc(t.artist)}</div>
+            <div class="meta-row">
+              <span class="bpm">${t.bpm} BPM</span>
+              <span><i data-lucide="${t.lyrics?'mic':'mic-off'}"></i></span>
+              <span class="genre-badge">${esc(t.genre)}</span>
+              ${t.cult&&c==='energy'?'<span class="cult-badge">КУЛЬТОВЫЙ</span>':''}
+            </div>
+            <button class="play-btn" data-url="${esc(t.url || '')}"><i data-lucide="play"></i> Play Preview</button>
+          </div>`).join('')}</div>`;
+        lucide.createIcons();
+
+        // ============================================================
+        // ОБРАБОТЧИК КНОПКИ PLAY
+        // Если url заполнен — открывает ссылку. Если пустой — алерт.
+        // ============================================================
+        area.querySelectorAll('.play-btn').forEach(b => b.addEventListener('click', function() {
+          const url = this.dataset.url;
+          if (url) {
+            window.open(url, '_blank'); // открывает ссылку в новой вкладке
+          } else {
+            alert('Стриминг не подключён\n🎵 ' + this.closest('.track-card').querySelector('.track-title').textContent);
+          }
+        }));
+      }
+
+      function load() { area.innerHTML = '<div class="vinyl-spinner"></div>'; }
+
+      function switchCat(c) {
+        cat = c;
+        btns.forEach(b => b.classList.toggle('active', b.dataset.category === c));
+        descEl.textContent = desc[c];
+        titleEl.innerHTML = titles[c];
+        lucide.createIcons();
+        load();
+        setTimeout(() => render(recommend(c), c), 300);
+      }
+
+      btns.forEach(b => b.addEventListener('click', () => switchCat(b.dataset.category)));
+
+      document.getElementById('openGuideBtn').addEventListener('click', () => document.getElementById('guideModal').classList.add('active'));
+      document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('guideModal').classList.remove('active'));
+      document.getElementById('guideModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('active'); });
+      document.getElementById('authorBtn').addEventListener('click', () => alert('Корниенко Никита, 10 класс, 67'));
+
+      load();
+      setTimeout(() => render(recommend('energy'), 'energy'), 200);
+    })();
+  </script>
+</body>
+</html>
